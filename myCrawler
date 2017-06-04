@@ -1,0 +1,59 @@
+import requests
+import re
+import os
+head = {'User-Agent':
+        'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0'}
+url_level1 = 'https://www.bbb160.com/htm/girllist10/1.htm'
+url_level2 = 'https://www.bbb160.com/htm/girl10/54.htm'
+url1 = 'https://www.bbb160.com/'
+patt_level2 = '/htm/girl10/[\S]*\.htm'
+patt_level3 = 'https://[\S]*\.jpg'
+
+
+class CatchImage():
+
+    def get_pages(self, url):
+        raw_page = requests.get(url, head)
+        raw_page.encoding = 'uft-8'
+        return raw_page.text
+
+    def part_url(self, pattern, url):
+        url_pattern = re.compile(pattern)
+        part_urls = re.findall(url_pattern, repr(self.get_pages(url)))
+        return part_urls
+
+    def total_url(self, pattern, url):
+        total_urls = [url1 + u for u in self.part_url(pattern, url)]
+        return total_urls
+
+    def pic_get(self, url):
+        img_dir = os.path.join(os.path.dirname(__file__), 'baidu')
+        try:
+            r = requests.get(url, head).content
+            dir_name = os.path.dirname(img_dir + url.split('girl')[-1])
+            isexist = os.path.exists(dir_name)
+            if not isexist:
+                os.makedirs(dir_name)
+            with open(os.path.join(dir_name, url.split('/')[-1]), 'wb') as f:
+                f.write(r)
+                print('downloadede')
+
+        except Exception as e:
+            print(e)
+
+    def get_pic_loop(self, url):
+        htms = self.total_url('/htm/girl10/[\S]*\.htm', url)
+        print(htms)
+        for htm in htms:
+            jpgs = self.part_url('https://[\S]*\.jpg', htm)
+            print(jpgs)
+            for jpg in jpgs:
+                print('downloading...', jpg)
+                self.pic_get(jpg)
+
+if __name__ == '__main__':
+    catchi = CatchImage()
+    catchi.get_pic_loop(url_level2)
+    #catchi.total_url(patt_level3, url_level2)
+
+
