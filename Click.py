@@ -3,6 +3,8 @@ import time
 # import sys
 # locations = [r'qiyong.png', r'tijiao.png',r'chongzhi.png']
 
+# rewrith with selenium module later
+
 pyautogui.FAILSAFE = False
 
 
